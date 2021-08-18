@@ -9,7 +9,7 @@
 - Run `sbt run`
 
 ## How to play
-Enter input into the console as suggested
+Enter choice into console as suggested
 
 ## Running tests
 ```shell
