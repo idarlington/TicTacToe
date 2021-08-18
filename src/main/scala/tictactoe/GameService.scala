@@ -35,7 +35,7 @@ object GameService {
       (colKey, square) <- row.toMap if square == Empty
     } yield s"$colKey$rowKey"
 
-    val formattedAvailableMoves: String = availableMoves.foldLeft("") {
+    val formattedAvailableMoves: String = availableMoves.toSeq.sorted.foldLeft("") {
       case (moves, coordinate) => s"$moves $coordinate"
     }
 
