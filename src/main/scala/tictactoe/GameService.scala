@@ -150,7 +150,7 @@ object GameService {
   }
 
   @tailrec
-  def gameLoop(player: Square, board: Board): Board = {
+  def gameLoop(player: Square, board: Board): Unit = {
     GameText.displayBoard(board)
     val availableMoves: Iterable[String] = showNextMoves(player, board)
     val coordinate: String               = receiveCoordinateInput(availableMoves)
@@ -160,12 +160,10 @@ object GameService {
       case Some(square) =>
         println(GameText.win(square))
         System.exit(0)
-        updatedBoard
       case None =>
         if (checkFull(updatedBoard)) {
           println(GameText.draw)
           System.exit(0)
-          updatedBoard
         } else {
           val otherPlayer = switch(player)
           gameLoop(otherPlayer, updatedBoard)
