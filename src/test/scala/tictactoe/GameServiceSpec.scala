@@ -23,8 +23,8 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
 
     "Show available moves" in {
       val gameService = new GameService(Player(X, Human), Player(O, Computer))
-      gameService.nextMoves(O, board) shouldBe List("B1", "A2", "C2", "A3", "B3")
-      gameService.nextMoves(X, board) shouldBe List("B1", "A2", "C2", "A3", "B3")
+      gameService.nextMoves( board) shouldBe List("B1", "A2", "C2", "A3", "B3")
+      gameService.nextMoves(board) shouldBe List("B1", "A2", "C2", "A3", "B3")
     }
 
     "Update board" in {
@@ -83,7 +83,7 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
     "Receive coordinate input" in {
       val gameService = new GameService(Player(X, Human), Player(O, Computer))
       val in             = new StringReader("B1")
-      val availableMoves = gameService.nextMoves(X, board)
+      val availableMoves = gameService.nextMoves(board)
 
       Console.withIn(in) {
         gameService.receiveCoordinateInput(availableMoves) shouldBe "B1"

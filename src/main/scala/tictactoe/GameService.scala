@@ -31,13 +31,6 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     }
   }
 
-  def nextMoves(square: Square, board: Board): Iterable[String] = {
-    for {
-      (rowKey, row) <- board.toMap
-      (colKey, square) <- row.toMap if square == Empty
-    } yield s"$colKey$rowKey"
-  }
-
   def showNextMoves(square: Square, moves: Iterable[String]): Unit = {
     val formattedAvailableMoves: String = moves.toSeq.sorted.foldLeft("") {
       case (moves, coordinate) => s"$moves $coordinate"
@@ -81,11 +74,72 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     }
   }
 
-  def collateSquareCoordinates(square: Square, board: Board): Iterable[String] = {
+  def minimaxMove(
+    player: Player,
+    opponent: Player,
+    board: Board,
+    maximize: Boolean
+  ): Outcome = {
+    if (gameOver(board)) {
+      if (checkFull(board)) {
+        Outcome(board, 0)
+      } else {
+        if (checkWinner(player.square, board).isDefined) {
+          Outcome(board, 1)
+        } else {
+          Outcome(board, -1)
+        }
+      }
+    } else {
+      if (maximize) {
+        nextMoves(board).foldLeft((Outcome(board, -1))) {
+          case (acc, current) =>
+            val updatedBoard = updateBoard(player.square, current, board = board)
+            val newValue = minimaxMove(
+              opponent,
+              player,
+              updatedBoard,
+              maximize = false
+            ).value
+            if (newValue > acc.value) Outcome(updatedBoard, newValue) else acc
+        }
+      } else {
+        nextMoves(board).foldLeft((Outcome(board, 1))) {
+          case (acc, current) =>
+            val updatedBoard = updateBoard(player.square, current, board = board)
+            val newValue = minimaxMove(
+              opponent,
+              player,
+              updatedBoard,
+              maximize = true
+            ).value
+            if (newValue < acc.value) Outcome(updatedBoard, newValue) else acc
+        }
+      }
+    }
+  }
+
+  def nextMoves(board: Board): Iterable[String] = {
     for {
       (rowKey, row) <- board.toMap
-      (colKey, existingSquare) <- row.toMap if square == existingSquare
+      (colKey, square) <- row.toMap if square == Empty
     } yield s"$colKey$rowKey"
+  }
+
+  def gameOver(board: Board): Boolean = {
+    if (!checkFull(board)) {
+      checkWinner(firstPlayer.square, board)
+        .orElse(checkWinner(secondPlayer.square, board))
+        .nonEmpty
+    } else {
+      true
+    }
+  }
+
+  def checkWinner(square: Square, board: Board): Option[Square] = {
+    checkRowWinner(board)
+      .orElse(checkColumnWinner(square, board))
+      .orElse(checkDiagonalWinner(square, board))
   }
 
   def checkColumnWinner(square: Square, board: Board): Option[Square] = {
@@ -102,6 +156,13 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
       .collectFirst {
         case matchAll if matchAll => square
       }
+  }
+
+  def collateSquareCoordinates(square: Square, board: Board): Iterable[String] = {
+    for {
+      (rowKey, row) <- board.toMap
+      (colKey, existingSquare) <- row.toMap if square == existingSquare
+    } yield s"$colKey$rowKey"
   }
 
   def checkRowWinner(board: Board): Option[Square] = {
@@ -135,12 +196,6 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
       }
   }
 
-  def checkWinner(square: Square, board: Board): Option[Square] = {
-    checkRowWinner(board)
-      .orElse(checkColumnWinner(square, board))
-      .orElse(checkDiagonalWinner(square, board))
-  }
-
   def checkFull(board: Board): Boolean = {
     board.toMap.forall {
       case (_, row) =>
@@ -156,16 +211,16 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     GameText.displayBoard(board)
     val updatedBoard: Board = currentPlayer.playerType match {
       case Human =>
-        val availableMoves: Iterable[String] = nextMoves(currentPlayer.square, board)
+        val availableMoves: Iterable[String] = nextMoves(board)
         showNextMoves(currentPlayer.square, availableMoves)
         val coordinate: String = receiveCoordinateInput(availableMoves)
         updateBoard(currentPlayer.square, coordinate, board)
       case Computer =>
-        val availableMoves: Iterable[String] = nextMoves(currentPlayer.square, board)
+        val availableMoves: Iterable[String] = nextMoves(board)
         val randomPosition: Int              = random.nextInt(availableMoves.size)
         val coordinate: String               = availableMoves.toSeq(randomPosition)
-        println(GameText.computerMove(coordinate))
-        updateBoard(currentPlayer.square, coordinate, board)
+
+        minimaxMove(currentPlayer, opponent, board, maximize = true).board
     }
 
     checkWinner(currentPlayer.square, updatedBoard) match {
@@ -185,4 +240,6 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
   def startGame(board: Board): Unit = {
     gameLoop(firstPlayer, secondPlayer, board)
   }
+
+  case class Outcome(board: Board, value: Int)
 }
