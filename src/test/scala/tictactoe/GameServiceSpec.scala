@@ -23,7 +23,7 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
 
     "Show available moves" in {
       val gameService = new GameService(Player(X, Human), Player(O, Computer))
-      gameService.nextMoves( board) shouldBe List("B1", "A2", "C2", "A3", "B3")
+      gameService.nextMoves(board) shouldBe List("B1", "A2", "C2", "A3", "B3")
       gameService.nextMoves(board) shouldBe List("B1", "A2", "C2", "A3", "B3")
     }
 
@@ -43,7 +43,7 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
     }
 
     "Check row winner" in {
-      val gameService = new GameService(Player(X, Human), Player(O, Computer))
+      val gameService  = new GameService(Player(X, Human), Player(O, Computer))
       val winningBoard = Board(Row(X, X, X), Row(Empty, O, Empty), Row(Empty, Empty, X))
 
       gameService.checkRowWinner(board) shouldBe None
@@ -51,7 +51,7 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
     }
 
     "Check column winner" in {
-      val gameService = new GameService(Player(X, Human), Player(O, Computer))
+      val gameService  = new GameService(Player(X, Human), Player(O, Computer))
       val winningBoard = Board(Row(X, O, O), Row(Empty, O, Empty), Row(Empty, O, X))
 
       gameService.checkColumnWinner(O, board) shouldBe None
@@ -59,7 +59,7 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
     }
 
     "Check diagonal winner" in {
-      val gameService = new GameService(Player(X, Human), Player(O, Computer))
+      val gameService  = new GameService(Player(X, Human), Player(O, Computer))
       val winningBoard = Board(Row(X, O, O), Row(Empty, X, Empty), Row(Empty, O, X))
 
       gameService.checkDiagonalWinner(O, board) shouldBe None
@@ -68,20 +68,14 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
 
     "Check board is full" in {
       val gameService = new GameService(Player(X, Human), Player(O, Computer))
-      val fullBoard = Board(Row(X, O, O), Row(X, X, O), Row(O, O, X))
+      val fullBoard   = Board(Row(X, O, O), Row(X, X, O), Row(O, O, X))
 
       gameService.checkDraw(board) shouldBe false
       gameService.checkDraw(fullBoard) shouldBe true
     }
 
-    "Switch player" in {
-      val gameService = new GameService(Player(X, Human), Player(O, Computer))
-      gameService.switch(X) shouldBe O
-      gameService.switch(O) shouldBe X
-    }
-
     "Receive coordinate input" in {
-      val gameService = new GameService(Player(X, Human), Player(O, Computer))
+      val gameService    = new GameService(Player(X, Human), Player(O, Computer))
       val in             = new StringReader("B1")
       val availableMoves = gameService.nextMoves(board)
 
@@ -92,7 +86,7 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
 
     "Receive Square input" in {
       val gameService = new GameService(Player(X, Human), Player(O, Computer))
-      val in = new StringReader("x")
+      val in          = new StringReader("x")
 
       Console.withIn(in) {
         gameService.receiveSquareInput() shouldBe X

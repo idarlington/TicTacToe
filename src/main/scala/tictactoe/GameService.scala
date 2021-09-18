@@ -31,6 +31,11 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     }
   }
 
+  def choosePlayer(): Square = {
+    println(GameText.choosePlayer)
+    receiveSquareInput()
+  }
+
   def showNextMoves(square: Square, moves: Iterable[String]): Unit = {
     val formattedAvailableMoves: String = moves.toSeq.sorted.foldLeft("") {
       case (moves, coordinate) => s"$moves $coordinate"
@@ -38,24 +43,18 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     println(GameText.showNextMove(square, formattedAvailableMoves))
   }
 
-  def switch(square: Square): Square = {
-    square match {
-      case X => O
-      case O => X
-      case Empty => Empty
-    }
-  }
-
-  def choosePlayer(): Square = {
-    println(GameText.choosePlayer)
-    receiveSquareInput()
-  }
-
   def randomMove(player: Player, board: Board): Board = {
     val availableMoves: Iterable[String] = nextMoves(board)
     val randomPosition: Int              = random.nextInt(availableMoves.size)
     val coordinate: String               = availableMoves.toSeq(randomPosition)
     updateBoard(player.square, coordinate, board)
+  }
+
+  def nextMoves(board: Board): Iterable[String] = {
+    for {
+      (rowKey, row) <- board.toMap
+      (colKey, square) <- row.toMap if square == Empty
+    } yield s"$colKey$rowKey"
   }
 
   def updateBoard(input: Square, coordinate: String, board: Board): Board = {
@@ -79,13 +78,6 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
       case "C3" if board.row3.col3 == Empty =>
         (board.copy(row3 = board.row3.copy(col3 = input)))
     }
-  }
-
-  def nextMoves(board: Board): Iterable[String] = {
-    for {
-      (rowKey, row) <- board.toMap
-      (colKey, square) <- row.toMap if square == Empty
-    } yield s"$colKey$rowKey"
   }
 
   final def minimaxMove(
@@ -219,10 +211,12 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     checkWinner(currentPlayer.square, updatedBoard) match {
       case Some(square) =>
         println(GameText.win(square))
+        GameText.displayBoard(updatedBoard)
         System.exit(0)
       case None =>
         if (checkDraw(updatedBoard)) {
           println(GameText.draw)
+          GameText.displayBoard(updatedBoard)
           System.exit(0)
         } else {
           gameLoop(opponent, currentPlayer, updatedBoard)
