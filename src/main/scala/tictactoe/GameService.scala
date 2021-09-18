@@ -1,11 +1,13 @@
 package tictactoe
 
 import scala.annotation.tailrec
+import scala.util.Random
 
-object GameService {
+class GameService(firstPlayer: Player, secondPlayer: Player) {
+  val random = new Random()
 
   @tailrec
-  def receiveSquareInput(): Square = {
+  final def receiveSquareInput(): Square = {
     scala.io.StdIn.readLine().trim.toLowerCase.strip() match {
       case "x" => X
       case "o" => O
@@ -16,7 +18,7 @@ object GameService {
   }
 
   @tailrec
-  def receiveCoordinateInput(availableMoves: Iterable[String]): String = {
+  final def receiveCoordinateInput(availableMoves: Iterable[String]): String = {
     val coordinate = scala.io.StdIn.readLine().trim.toUpperCase.strip()
     availableMoves.find { move =>
       move == coordinate
@@ -29,18 +31,18 @@ object GameService {
     }
   }
 
-  def showNextMoves(square: Square, board: Board): Iterable[String] = {
-    val availableMoves: Iterable[String] = for {
+  def nextMoves(square: Square, board: Board): Iterable[String] = {
+    for {
       (rowKey, row) <- board.toMap
       (colKey, square) <- row.toMap if square == Empty
     } yield s"$colKey$rowKey"
+  }
 
-    val formattedAvailableMoves: String = availableMoves.toSeq.sorted.foldLeft("") {
+  def showNextMoves(square: Square, moves: Iterable[String]): Unit = {
+    val formattedAvailableMoves: String = moves.toSeq.sorted.foldLeft("") {
       case (moves, coordinate) => s"$moves $coordinate"
     }
-
     println(GameText.showNextMove(square, formattedAvailableMoves))
-    availableMoves
   }
 
   def switch(square: Square): Square = {
@@ -150,13 +152,23 @@ object GameService {
   }
 
   @tailrec
-  def gameLoop(player: Square, board: Board): Unit = {
+  final def gameLoop(currentPlayer: Player, opponent: Player, board: Board): Unit = {
     GameText.displayBoard(board)
-    val availableMoves: Iterable[String] = showNextMoves(player, board)
-    val coordinate: String               = receiveCoordinateInput(availableMoves)
-    val updatedBoard: Board              = updateBoard(player, coordinate, board)
+    val updatedBoard: Board = currentPlayer.playerType match {
+      case Human =>
+        val availableMoves: Iterable[String] = nextMoves(currentPlayer.square, board)
+        showNextMoves(currentPlayer.square, availableMoves)
+        val coordinate: String = receiveCoordinateInput(availableMoves)
+        updateBoard(currentPlayer.square, coordinate, board)
+      case Computer =>
+        val availableMoves: Iterable[String] = nextMoves(currentPlayer.square, board)
+        val randomPosition: Int              = random.nextInt(availableMoves.size)
+        val coordinate: String               = availableMoves.toSeq(randomPosition)
+        println(GameText.computerMove(coordinate))
+        updateBoard(currentPlayer.square, coordinate, board)
+    }
 
-    checkWinner(player, updatedBoard) match {
+    checkWinner(currentPlayer.square, updatedBoard) match {
       case Some(square) =>
         println(GameText.win(square))
         System.exit(0)
@@ -165,14 +177,12 @@ object GameService {
           println(GameText.draw)
           System.exit(0)
         } else {
-          val otherPlayer = switch(player)
-          gameLoop(otherPlayer, updatedBoard)
+          gameLoop(opponent, currentPlayer, updatedBoard)
         }
     }
   }
 
   def startGame(board: Board): Unit = {
-    val square = choosePlayer()
-    gameLoop(square, board)
+    gameLoop(firstPlayer, secondPlayer, board)
   }
 }

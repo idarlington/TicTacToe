@@ -21,3 +21,9 @@ case class Row(col1: Square, col2: Square, col3: Square) {
 case class Board(row1: Row, row2: Row, row3: Row) {
   def toMap: Map[String, Row] = Map("1" -> row1, "2" -> row2, "3" -> row3)
 }
+
+trait PlayerType
+case object Human extends PlayerType
+case object Computer extends PlayerType
+
+case class Player(square: Square, playerType: PlayerType)

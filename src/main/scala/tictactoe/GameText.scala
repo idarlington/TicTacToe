@@ -18,6 +18,8 @@ object GameText {
     boardDisplay
   }
 
+  def computerMove(coordinate: String): String = s"Computer played $coordinate"
+
   def win(square: Square): String = s"Player $square wins the game!!"
 
   def showNextMove(square: Square, formattedMoves: String): String =
