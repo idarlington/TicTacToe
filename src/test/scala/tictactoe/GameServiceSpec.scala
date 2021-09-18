@@ -70,8 +70,8 @@ class GameServiceSpec extends AnyWordSpec with Matchers {
       val gameService = new GameService(Player(X, Human), Player(O, Computer))
       val fullBoard = Board(Row(X, O, O), Row(X, X, O), Row(O, O, X))
 
-      gameService.checkFull(board) shouldBe false
-      gameService.checkFull(fullBoard) shouldBe true
+      gameService.checkDraw(board) shouldBe false
+      gameService.checkDraw(fullBoard) shouldBe true
     }
 
     "Switch player" in {
