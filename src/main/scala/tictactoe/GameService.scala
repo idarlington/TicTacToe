@@ -81,39 +81,25 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     maximize: Boolean
   ): Outcome = {
     if (gameOver(board)) {
-      if (checkFull(board)) {
-        Outcome(board, 0)
-      } else {
-        if (checkWinner(player.square, board).isDefined) {
-          Outcome(board, 1)
-        } else {
-          Outcome(board, -1)
-        }
+      board match {
+        case _ if (checkFull(board)) => Outcome(board, 0, None)
+        case _ if (checkWinner(player.square, board).isDefined) => Outcome(board, 1, None)
+        case _ => Outcome(board, -1, None)
       }
     } else {
       if (maximize) {
-        nextMoves(board).foldLeft((Outcome(board, -1))) {
-          case (acc, current) =>
-            val updatedBoard = updateBoard(player.square, current, board = board)
-            val newValue = minimaxMove(
-              opponent,
-              player,
-              updatedBoard,
-              maximize = false
-            ).value
-            if (newValue > acc.value) Outcome(updatedBoard, newValue) else acc
+        nextMoves(board).foldLeft((Outcome(board, -1, None))) {
+          case (acc, move) =>
+            val updatedBoard = updateBoard(player.square, move, board = board)
+            val newValue     = minimaxMove(opponent, player, updatedBoard, maximize = false).value
+            if (newValue > acc.value) Outcome(updatedBoard, newValue, Some(move)) else acc
         }
       } else {
-        nextMoves(board).foldLeft((Outcome(board, 1))) {
-          case (acc, current) =>
-            val updatedBoard = updateBoard(player.square, current, board = board)
-            val newValue = minimaxMove(
-              opponent,
-              player,
-              updatedBoard,
-              maximize = true
-            ).value
-            if (newValue < acc.value) Outcome(updatedBoard, newValue) else acc
+        nextMoves(board).foldLeft((Outcome(board, 1, None))) {
+          case (acc, move) =>
+            val updatedBoard = updateBoard(player.square, move, board = board)
+            val newValue     = minimaxMove(opponent, player, updatedBoard, maximize = true).value
+            if (newValue < acc.value) Outcome(updatedBoard, newValue, Some(move)) else acc
         }
       }
     }
@@ -219,8 +205,11 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
         val availableMoves: Iterable[String] = nextMoves(board)
         val randomPosition: Int              = random.nextInt(availableMoves.size)
         val coordinate: String               = availableMoves.toSeq(randomPosition)
-
-        minimaxMove(currentPlayer, opponent, board, maximize = true).board
+        val move: Outcome                    = minimaxMove(currentPlayer, opponent, board, maximize = true)
+        move.move.foreach { coordinate =>
+          println(GameText.computerMove(coordinate))
+        }
+        move.board
     }
 
     checkWinner(currentPlayer.square, updatedBoard) match {
@@ -241,5 +230,4 @@ class GameService(firstPlayer: Player, secondPlayer: Player) {
     gameLoop(firstPlayer, secondPlayer, board)
   }
 
-  case class Outcome(board: Board, value: Int)
 }

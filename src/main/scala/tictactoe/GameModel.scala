@@ -27,3 +27,4 @@ case object Human extends PlayerType
 case object Computer extends PlayerType
 
 case class Player(square: Square, playerType: PlayerType)
+case class Outcome(board: Board, value: Int, move: Option[String])
