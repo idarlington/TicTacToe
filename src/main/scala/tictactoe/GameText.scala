@@ -1,9 +1,11 @@
 package tictactoe
 
 object GameText {
-  val invalidInput: String = "Invalid choice, try again"
-  val choosePlayer: String = "Please choose a player: X or O"
-  val draw: String         = "It is a draw!!"
+  val invalidInput: String             = "Invalid choice, try again"
+  val chooseSquare: String             = "Please choose a player symbol: X or O"
+  val choosePlayerType: String         = "Please choose a player type: Human or Computer"
+  val chooseOpponentPlayerType: String = "Please choose opponent player type: Human or Computer"
+  val draw: String                     = "It is a draw!!"
 
   def displayBoard(board: Board): String = {
     val boardDisplay =
@@ -18,7 +20,8 @@ object GameText {
     boardDisplay
   }
 
-  def computerMove(coordinate: String): String = s"Computer played $coordinate"
+  def move(coordinate: String, player: Player): String =
+    s"Player ${player.square} played $coordinate"
 
   def win(square: Square): String = s"Player $square wins the game!!"
 
