@@ -31,4 +31,4 @@ case class Player(square: NonEmptySquare, playerType: PlayerType)
 
 case class Players(currentPlayer: Player, opponent: Player)
 
-case class Outcome(board: Board, score: Int, move: Option[String])
+case class MinMaxOutcome(score: Int, move: Option[String])

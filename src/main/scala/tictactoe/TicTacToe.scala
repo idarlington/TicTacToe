@@ -10,7 +10,7 @@ object TicTacToe extends App {
     Row(Empty, Empty, Empty)
   )
 
-  private val firstPlayer  = choosePlayer(None)
+  private val firstPlayer  = choosePlayer()
   private val secondPlayer = choosePlayer(Some(switch(firstPlayer.square)))
   private val players      = Players(firstPlayer, secondPlayer)
 

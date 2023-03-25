@@ -1,5 +1,7 @@
 package tictactoe
 
+import tictactoe.GameText.displayText
+
 import scala.annotation.tailrec
 import scala.util.Random
 
@@ -15,23 +17,16 @@ class GameService(players: Players) {
       case Some(value) =>
         value
       case None =>
-        println(GameText.invalidInput)
+        displayText(GameText.invalidInput)
         receiveCoordinateInput(availableMoves)
     }
   }
 
-  private def showNextMoves(square: Square, moves: Iterable[String]): Unit = {
-    val formattedAvailableMoves: String = moves.toSeq.sorted.foldLeft("") {
-      case (moves, coordinate) => s"$moves $coordinate"
-    }
-    println(GameText.showNextMove(square, formattedAvailableMoves))
-  }
-
-  def randomMove(player: Player, board: Board): Board = {
-    val availableMoves: Iterable[String] = nextMoves(board)
-    val randomPosition: Int              = random.nextInt(availableMoves.size)
-    val coordinate: String               = availableMoves.toSeq(randomPosition)
-    updateBoard(player.square, coordinate, board)
+  private def collateSquareCoordinates(square: Square, board: Board): Iterable[String] = {
+    for {
+      (rowKey, row) <- board.toMap
+      (colKey, existingSquare) <- row.toMap if square == existingSquare
+    } yield s"$colKey$rowKey"
   }
 
   def nextMoves(board: Board): Iterable[String] = {
@@ -39,6 +34,13 @@ class GameService(players: Players) {
       (rowKey, row) <- board.toMap
       (colKey, square) <- row.toMap if square == Empty
     } yield s"$colKey$rowKey"
+  }
+
+  private def showNextMoves(square: Square, moves: Iterable[String]): Unit = {
+    val formattedAvailableMoves: String = moves.toSeq.sorted.foldLeft("") {
+      case (moves, coordinate) => s"$moves $coordinate"
+    }
+    displayText(GameText.showNextMove(square, formattedAvailableMoves))
   }
 
   def updateBoard(input: Square, coordinate: String, board: Board): Board = {
@@ -64,69 +66,13 @@ class GameService(players: Players) {
     }
   }
 
-  private final def minimaxMove(
-    player: Player,
-    opponent: Player,
-    board: Board,
-    depth: Int = 0,
-    maximize: Boolean
-  ): Outcome = {
-
-    if (gameOver(board)) {
-      board match {
-        case _ if (checkDraw(board)) => Outcome(board, 0, None)
-        case _ if checkWinner(board).contains(player.square) => Outcome(board, 10 - depth, None)
-        case _ => Outcome(board, depth - 10, None)
-      }
-    } else {
-      if (maximize) {
-        nextMoves(board).foldLeft((Outcome(board, -10, None))) {
-          case (acc, move) =>
-            val updatedBoard = updateBoard(player.square, move, board = board)
-            val gameValue = minimaxMove(
-              player   = player,
-              opponent = opponent,
-              board    = updatedBoard,
-              depth    = depth + 1,
-              maximize = false
-            ).score
-            if (gameValue > acc.score) Outcome(updatedBoard, gameValue, Some(move))
-            else acc
-        }
-      } else {
-        nextMoves(board).foldLeft((Outcome(board, 10, None))) {
-          case (acc, move) =>
-            val updatedBoard = updateBoard(opponent.square, move, board = board)
-            val gameValue =
-              minimaxMove(
-                player   = player,
-                opponent = opponent,
-                board    = updatedBoard,
-                depth    = depth + 1,
-                maximize = true
-              ).score
-            if (gameValue < acc.score) Outcome(updatedBoard, gameValue, Some(move))
-            else acc
-        }
-      }
-    }
-  }
-
-  private def gameOver(board: Board): Boolean = {
-    checkDraw(board) || checkWinner(board).isDefined
-  }
-
-  private def checkWinner(board: Board): Option[Square] = {
-    checkRowWinner(board)
-      .orElse(checkColumnWinner(board))
-      .orElse(checkDiagonalWinner(board))
-  }
-
   def checkColumnWinner(board: Board): Option[Square] = {
     def checkColumnWin(square: Square, coordinates: Iterable[String]): Option[Square] = {
-      val columnWinnerMatches: Seq[Seq[String]] =
-        Seq(Seq("A1", "A2", "A3"), Seq("B1", "B2", "B3"), Seq("C1", "C2", "C3"))
-
+      val columnWinnerMatches: Seq[Seq[String]] = Seq(
+        Seq("A1", "A2", "A3"),
+        Seq("B1", "B2", "B3"),
+        Seq("C1", "C2", "C3")
+      )
       columnWinnerMatches
         .map { win =>
           win.forall { coordinate =>
@@ -142,13 +88,6 @@ class GameService(players: Players) {
     val oSquareCoordinates = collateSquareCoordinates(O, board)
 
     checkColumnWin(X, xSquareCoordinates).orElse(checkColumnWin(O, oSquareCoordinates))
-  }
-
-  private def collateSquareCoordinates(square: Square, board: Board): Iterable[String] = {
-    for {
-      (rowKey, row) <- board.toMap
-      (colKey, existingSquare) <- row.toMap if square == existingSquare
-    } yield s"$colKey$rowKey"
   }
 
   def checkRowWinner(board: Board): Option[Square] = {
@@ -185,7 +124,12 @@ class GameService(players: Players) {
     val oSquareCoordinate = collateSquareCoordinates(O, board)
 
     checkDiagonalWin(X, xSquareCoordinate).orElse(checkDiagonalWin(O, oSquareCoordinate))
+  }
 
+  private def checkWinner(board: Board): Option[Square] = {
+    checkRowWinner(board)
+      .orElse(checkColumnWinner(board))
+      .orElse(checkDiagonalWinner(board))
   }
 
   def checkDraw(board: Board): Boolean = {
@@ -198,40 +142,100 @@ class GameService(players: Players) {
     }
   }
 
+  def startGame(board: Board): Unit = {
+    gameLoop(players.currentPlayer, players.opponent, board)
+  }
+
+  private def randomMove(board: Board): String = {
+    val availableMoves: Iterable[String] = nextMoves(board)
+    val randomPosition: Int              = random.nextInt(availableMoves.size)
+    availableMoves.toSeq(randomPosition)
+  }
+
+  private final def minimaxMove(
+    player: Player,
+    opponent: Player,
+    board: Board,
+    depth: Int,
+    maximize: Boolean
+  ): MinMaxOutcome = {
+
+    if (gameOver(board)) {
+      board match {
+        case _ if (checkDraw(board)) => MinMaxOutcome(0, None)
+        case _ if checkWinner(board).contains(player.square) => MinMaxOutcome(10 - depth, None)
+        case _ => MinMaxOutcome(depth - 10, None)
+      }
+    } else {
+      val availableMoves = nextMoves(board)
+      if (maximize) {
+        availableMoves.foldLeft(MinMaxOutcome(-10, None)) {
+          case (acc, move) =>
+            val updatedBoard = updateBoard(player.square, move, board = board)
+            val gameValue = minimaxMove(
+              player   = player,
+              opponent = opponent,
+              board    = updatedBoard,
+              depth    = depth + 1,
+              maximize = false
+            ).score
+            if (gameValue > acc.score) MinMaxOutcome(gameValue, Some(move))
+            else acc
+        }
+      } else {
+        availableMoves.foldLeft(MinMaxOutcome(10, None)) {
+          case (acc, move) =>
+            val updatedBoard = updateBoard(opponent.square, move, board = board)
+            val gameValue =
+              minimaxMove(
+                player   = player,
+                opponent = opponent,
+                board    = updatedBoard,
+                depth    = depth + 1,
+                maximize = true
+              ).score
+            if (gameValue < acc.score) MinMaxOutcome(gameValue, Some(move))
+            else acc
+        }
+      }
+    }
+  }
+
+  private def gameOver(board: Board): Boolean = {
+    checkDraw(board) || checkWinner(board).isDefined
+  }
+
   @tailrec
   private final def gameLoop(currentPlayer: Player, opponent: Player, board: Board): Unit = {
     GameText.displayBoard(board)
-    val updatedBoard: Board = currentPlayer.playerType match {
+
+    val playerMove: String = currentPlayer.playerType match {
       case Human =>
         val availableMoves: Iterable[String] = nextMoves(board)
         showNextMoves(currentPlayer.square, availableMoves)
-        val coordinate: String = receiveCoordinateInput(availableMoves)
-        println(GameText.move(coordinate, currentPlayer))
-        updateBoard(currentPlayer.square, coordinate, board)
+        receiveCoordinateInput(availableMoves)
       case Computer =>
-        val outCome: Outcome =
-          minimaxMove(
-            board    = board,
-            player   = currentPlayer,
-            opponent = opponent,
-            maximize = true
-          )
-        outCome.move.collect { coordinate =>
-          println(GameText.move(coordinate, currentPlayer))
-        }
-        outCome.board
+        val minMaxMove = minimaxMove(
+          board    = board,
+          player   = currentPlayer,
+          opponent = opponent,
+          depth    = 0,
+          maximize = true
+        )
+        minMaxMove.move.getOrElse(randomMove(board))
     }
+
+    displayText(GameText.move(playerMove, currentPlayer))
+    val updatedBoard = updateBoard(currentPlayer.square, playerMove, board)
 
     checkWinner(updatedBoard) match {
       case Some(square) =>
         println(GameText.win(square))
         GameText.displayBoard(updatedBoard)
-        System.exit(0)
       case None =>
         if (checkDraw(updatedBoard)) {
           println(GameText.draw)
           GameText.displayBoard(updatedBoard)
-          System.exit(0)
         } else {
           gameLoop(
             currentPlayer = opponent,
@@ -241,11 +245,6 @@ class GameService(players: Players) {
         }
     }
   }
-
-  def startGame(board: Board): Unit = {
-    gameLoop(players.currentPlayer, players.opponent, board)
-  }
-
 }
 
 object GameService {
@@ -263,13 +262,20 @@ object GameService {
       case "x" => X
       case "o" => O
       case _ =>
-        println(GameText.invalidInput)
+        displayText(GameText.invalidInput)
         receiveSquareInput()
     }
   }
 
+  final def choosePlayer(optionalSquare: Option[NonEmptySquare] = None): Player = {
+    val square     = optionalSquare.getOrElse(chooseSquare())
+    val playerType = choosePlayerType(optionalSquare.isDefined)
+
+    Player(square, playerType)
+  }
+
   private def chooseSquare(): NonEmptySquare = {
-    println(GameText.chooseSquare)
+    displayText(GameText.chooseSquare)
     receiveSquareInput()
   }
 
@@ -279,25 +285,18 @@ object GameService {
       case "human" | "h" => Human
       case "computer" | "c" => Computer
       case _ =>
-        println(GameText.invalidInput)
+        displayText(GameText.invalidInput)
         receivePlayerType()
     }
   }
 
   private def choosePlayerType(squareExists: Boolean): PlayerType = {
     if (squareExists) {
-      println(GameText.chooseOpponentPlayerType)
+      displayText(GameText.chooseOpponentPlayerType)
     } else {
-      println(GameText.choosePlayerType)
+      displayText(GameText.choosePlayerType)
     }
 
     receivePlayerType()
-  }
-
-  final def choosePlayer(optionalSquare: Option[NonEmptySquare]): Player = {
-    val square     = optionalSquare.getOrElse(chooseSquare())
-    val playerType = choosePlayerType(optionalSquare.isDefined)
-
-    Player(square, playerType)
   }
 }

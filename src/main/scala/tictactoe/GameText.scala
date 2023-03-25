@@ -20,6 +20,10 @@ object GameText {
     boardDisplay
   }
 
+  def displayText(text: String): Unit = {
+    println(text)
+  }
+
   def move(coordinate: String, player: Player): String =
     s"Player ${player.square} played $coordinate"
 
