@@ -1,6 +1,8 @@
 package tictactoe
 
-object GameText {
+import tictactoe.model.{Board, Player, Square}
+
+object TextUtils {
   val invalidInput: String             = "Invalid choice, try again"
   val chooseSquare: String             = "Please choose a player symbol: X or O"
   val choosePlayerType: String         = "Please choose a player type: Human or Computer"

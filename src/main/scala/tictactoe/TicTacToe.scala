@@ -1,6 +1,7 @@
 package tictactoe
 
 import tictactoe.GameService.{ choosePlayer, switch }
+import tictactoe.model.{ Board, Empty, Players, Row }
 
 object TicTacToe extends App {
 
