@@ -1,33 +1,32 @@
 package tictactoe.model
 
-import tictactoe.GameService
-
+import tictactoe.client.ConsoleGameClient
 import scala.util.Random
 
 sealed trait Player {
-  def square: NonEmptySquare
+  def square: Square.NonEmpty
 
   def `type`: PlayerType
 
   def play(board: Board): String
 }
 
-case class HumanPlayer(square: NonEmptySquare) extends Player {
+case class HumanPlayer(square: Square.NonEmpty) extends Player {
   override def `type`: PlayerType = Human
 
   def play(board: Board): String = {
-    val availableMoves: Iterable[String] = board.nextMoves()
+    val availableMoves: Iterable[String] = board.availableMoves()
     //TODO move this display away
-    GameService.showNextMoves(square, availableMoves)
-    GameService.receiveCoordinateInput(availableMoves)
+    ConsoleGameClient.showNextMoves(square, availableMoves)
+    ConsoleGameClient.receiveCoordinateInput(availableMoves)
   }
 }
 
-case class ComputerPlayer(square: NonEmptySquare) extends Player {
+case class ComputerPlayer(square: Square.NonEmpty) extends Player {
   private val random = new Random()
 
   private def randomMove(board: Board): String = {
-    val availableMoves: Iterable[String] = board.nextMoves()
+    val availableMoves: Iterable[String] = board.availableMoves()
     val randomPosition: Int              = random.nextInt(availableMoves.size)
     availableMoves.toSeq(randomPosition)
   }
@@ -47,7 +46,7 @@ case class ComputerPlayer(square: NonEmptySquare) extends Player {
         case _ => MinMaxOutcome(depth - 10, None)
       }
     } else {
-      val availableMoves = (board.nextMoves())
+      val availableMoves = board.availableMoves()
       if (maximize) {
         availableMoves.foldLeft(MinMaxOutcome(-10, None)) {
           case (acc, move) =>
@@ -85,7 +84,7 @@ case class ComputerPlayer(square: NonEmptySquare) extends Player {
     val minMaxMove = minimaxMove(
       board    = board,
       player   = square,
-      opponent = GameService.switch(square),
+      opponent = ConsoleGameClient.switch(square),
       depth    = 0,
       maximize = true
     )

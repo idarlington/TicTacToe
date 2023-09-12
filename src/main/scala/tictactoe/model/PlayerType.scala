@@ -1,6 +1,6 @@
 package tictactoe.model
 
-import tictactoe.GameService
+import tictactoe.client.ConsoleGameClient
 
 sealed trait PlayerType
 case object Human extends PlayerType

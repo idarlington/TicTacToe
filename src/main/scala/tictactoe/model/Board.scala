@@ -1,6 +1,7 @@
 package tictactoe.model
 
 case class Board(row1: Row, row2: Row, row3: Row) {
+  import Square._
   private def toMap: Map[String, Row] = Map("1" -> row1, "2" -> row2, "3" -> row3)
 
   def checkColumnWinner(): Option[Square] = {
@@ -53,7 +54,7 @@ case class Board(row1: Row, row2: Row, row3: Row) {
       .orElse(checkDiagonalWinner())
   }
 
-  def nextMoves(): Iterable[String] = {
+  def availableMoves(): Iterable[String] = {
     for {
       (rowKey, row) <- toMap
       (colKey, square) <- row.toMap if square == Empty
@@ -113,10 +114,7 @@ case class Board(row1: Row, row2: Row, row3: Row) {
   def isDraw: Boolean = {
     toMap.forall {
       case (_, row) =>
-        row.toMap.forall {
-          case (_, square) =>
-            square != Empty
-        }
+        row.isFilled
     }
   }
 }
