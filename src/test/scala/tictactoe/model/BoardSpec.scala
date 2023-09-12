@@ -4,11 +4,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class BoardSpec extends AnyWordSpec with Matchers {
-
   import Square._
 
-  val board: Board     = Board(Row(X, Empty, O), Row(Empty, O, Empty), Row(Empty, Empty, X))
-  val players: Players = Players(HumanPlayer(X), ComputerPlayer(O))
+  val board: Board = Board(Row(X, Empty, O), Row(Empty, O, Empty), Row(Empty, Empty, X))
 
   "Board" should {
     "Calculate next moves" in {

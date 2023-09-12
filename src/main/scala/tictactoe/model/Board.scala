@@ -64,23 +64,23 @@ case class Board(row1: Row, row2: Row, row3: Row) {
   def updateBoard(input: Square, coordinate: String): Board = {
     coordinate match {
       case "A1" if this.row1.col1 == Empty =>
-        (this.copy(row1 = this.row1.copy(col1 = input)))
+        this.copy(row1 = this.row1.copy(col1 = input))
       case "A2" if this.row2.col1 == Empty =>
-        (this.copy(row2 = this.row2.copy(col1 = input)))
+        this.copy(row2 = this.row2.copy(col1 = input))
       case "A3" if this.row3.col1 == Empty =>
-        (this.copy(row3 = this.row3.copy(col1 = input)))
+        this.copy(row3 = this.row3.copy(col1 = input))
       case "B1" if this.row1.col2 == Empty =>
-        (this.copy(row1 = this.row1.copy(col2 = input)))
+        this.copy(row1 = this.row1.copy(col2 = input))
       case "B2" if this.row2.col2 == Empty =>
-        (this.copy(row2 = this.row2.copy(col2 = input)))
+        this.copy(row2 = this.row2.copy(col2 = input))
       case "B3" if this.row3.col2 == Empty =>
-        (this.copy(row3 = this.row3.copy(col2 = input)))
+        this.copy(row3 = this.row3.copy(col2 = input))
       case "C1" if this.row1.col3 == Empty =>
-        (this.copy(row1 = this.row1.copy(col3 = input)))
+        this.copy(row1 = this.row1.copy(col3 = input))
       case "C2" if this.row2.col3 == Empty =>
-        (this.copy(row2 = this.row2.copy(col3 = input)))
+        this.copy(row2 = this.row2.copy(col3 = input))
       case "C3" if this.row3.col3 == Empty =>
-        (this.copy(row3 = this.row3.copy(col3 = input)))
+        this.copy(row3 = this.row3.copy(col3 = input))
     }
   }
 

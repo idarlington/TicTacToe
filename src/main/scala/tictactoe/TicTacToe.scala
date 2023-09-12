@@ -1,10 +1,9 @@
 package tictactoe
 
-import tictactoe.client.ConsoleGameClient
-import tictactoe.client.ConsoleGameClient.{choosePlayer, switch}
+import tictactoe.client.console.Client
 import tictactoe.engine.InMemoryGameEngine
 import tictactoe.model.Square.Empty
-import tictactoe.model.{Board, Players, Row}
+import tictactoe.model.{Board, Row}
 
 object TicTacToe extends App {
 
@@ -14,11 +13,7 @@ object TicTacToe extends App {
     Row(Empty, Empty, Empty)
   )
 
-  private val firstPlayer  = choosePlayer()
-  private val secondPlayer = choosePlayer(Some(switch(firstPlayer.square)))
-  private val players      = Players(firstPlayer, secondPlayer)
-
-  val gameEngine  = new InMemoryGameEngine()
-  val gameService = new ConsoleGameClient(players, gameEngine)
-  gameService.startGame(board)
+  private val gameEngine    = new InMemoryGameEngine()
+  private val consoleClient = new Client(gameEngine)
+  consoleClient.start(board = board)
 }

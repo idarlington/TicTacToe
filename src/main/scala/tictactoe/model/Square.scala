@@ -7,7 +7,15 @@ object Square {
     override def toString: String = "."
   }
 
-  trait NonEmpty extends Square
+  trait NonEmpty extends Square {
+
+    def switch(): NonEmpty = {
+      this match {
+        case X => O
+        case O => X
+      }
+    }
+  }
 
   case object X extends NonEmpty {
     override def toString: String = "X"

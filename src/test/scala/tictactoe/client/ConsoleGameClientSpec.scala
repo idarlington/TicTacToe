@@ -2,6 +2,7 @@ package tictactoe.client
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec._
+import tictactoe.client.console.{ ConsoleUtils, Client }
 import tictactoe.engine.InMemoryGameEngine
 import tictactoe.model._
 
@@ -11,10 +12,10 @@ import java.nio.charset.StandardCharsets
 class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
   import Square._
   val board: Board     = Board(Row(X, Empty, O), Row(Empty, O, Empty), Row(Empty, Empty, X))
-  val players: Players = Players(HumanPlayer(X), ComputerPlayer(O))
+  val players: Players = Players(console.HumanPlayer(X), ComputerPlayer(O))
   val gameEngine       = new InMemoryGameEngine()
 
-  "ConsoleGameClient" should {
+  "GameClient" should {
     "Display a board" in {
       val expected =
         """
@@ -32,7 +33,7 @@ class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
       val availableMoves = board.availableMoves()
 
       Console.withIn(in) {
-        ConsoleGameClient.receiveCoordinateInput(availableMoves) shouldBe "B1"
+        Client.receiveCoordinateInput(availableMoves) shouldBe "B1"
       }
     }
 
@@ -40,7 +41,7 @@ class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
       val in = new StringReader("x")
 
       Console.withIn(in) {
-        ConsoleGameClient.receiveSquareInput() shouldBe X
+        Client.receiveSquareInput() shouldBe X
       }
     }
 
@@ -55,9 +56,9 @@ class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
       val in: InputStream = new ByteArrayInputStream(lines.getBytes(StandardCharsets.UTF_8))
 
       Console.withIn(in) {
-        ConsoleGameClient.choosePlayer() shouldBe (HumanPlayer(X))
-        ConsoleGameClient.choosePlayer() shouldBe (HumanPlayer(O))
-        ConsoleGameClient.choosePlayer(Some(X)) shouldBe (ComputerPlayer(X))
+        Client.choosePlayer() shouldBe (console.HumanPlayer(X))
+        Client.choosePlayer() shouldBe (console.HumanPlayer(O))
+        Client.choosePlayer(Some(X)) shouldBe (ComputerPlayer(X))
       }
     }
 
@@ -65,10 +66,10 @@ class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
       val out          = new ByteArrayOutputStream()
       val board: Board = Board(Row(O, Empty, X), Row(Empty, X, Empty), Row(Empty, Empty, O))
       val consoleGame =
-        new ConsoleGameClient(Players(ComputerPlayer(X), ComputerPlayer(O)), gameEngine)
+        new Client(gameEngine)
 
       Console.withOut(out) {
-        consoleGame.startGame(board)
+        consoleGame.start(board = board, players = Players(ComputerPlayer(X), ComputerPlayer(O)))
       }
 
       out.toString should include("Player X wins the game!!")
@@ -79,10 +80,10 @@ class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
       val board: Board =
         Board(Row(Empty, Empty, Empty), Row(Empty, Empty, Empty), Row(Empty, Empty, Empty))
       val gameService =
-        new ConsoleGameClient(Players(ComputerPlayer(X), ComputerPlayer(O)), gameEngine)
+        new Client(gameEngine)
 
       Console.withOut(out) {
-        gameService.startGame(board)
+        gameService.start(board = board, players = Players(ComputerPlayer(X), ComputerPlayer(O)))
       }
 
       out.toString should include("It is a draw!!")

@@ -1,4 +1,4 @@
-package tictactoe.client
+package tictactoe.client.console
 
 import tictactoe.model.{Board, Player, Square}
 
@@ -18,7 +18,7 @@ object ConsoleUtils {
          |3  ${board.row3.col1}  ${board.row3.col2}  ${board.row3.col3}
          |""".stripMargin
 
-    println(boardDisplay)
+    displayText(boardDisplay)
     boardDisplay
   }
 

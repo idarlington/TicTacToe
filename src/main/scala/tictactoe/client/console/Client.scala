@@ -1,24 +1,30 @@
-package tictactoe.client
+package tictactoe.client.console
 
-import ConsoleUtils.displayText
+import tictactoe.client.console.ConsoleUtils.displayText
+import tictactoe.client.console.Client.choosePlayer
 import tictactoe.engine.GameEngine
 import tictactoe.model._
 
 import java.util.UUID
 import scala.annotation.tailrec
 
-class ConsoleGameClient(players: Players, gameEngine: GameEngine) {
+class Client(gameEngine: GameEngine) {
+  private def createPlayers(): Players = {
+    val firstPlayer  = choosePlayer()
+    val secondPlayer = choosePlayer(Some(firstPlayer.square.switch()))
+    Players(firstPlayer, secondPlayer)
+  }
 
-  def startGame(board: Board): Unit = {
+  def start(players: Players = createPlayers(), board: Board): Unit = {
     val session = gameEngine.initGameSession(players, board)
     session match {
       case Left(error) =>
         throw error
-      case Right(session) => gameLoopEngine(players.currentPlayer, session.id)
+      case Right(session) => loop(players.currentPlayer, session.id)
     }
   }
 
-  private final def gameLoopEngine(currentPlayer: Player, sessionId: UUID): Unit = {
+  private final def loop(currentPlayer: Player, sessionId: UUID): Unit = {
 
     for {
       session <- gameEngine.getGameSession(sessionId).toRight(GameSessionDoesNotExistError())
@@ -31,14 +37,14 @@ class ConsoleGameClient(players: Players, gameEngine: GameEngine) {
 
       _ = updatedSession.state match {
         case GameState.InPlay =>
-          gameLoopEngine(players.switchPlayer(currentPlayer), updatedSession.id)
+          loop(updatedSession.players.currentPlayer, updatedSession.id)
         case GameState.Ended(condition) =>
           condition match {
             case GameEndedCondition.Draw =>
-              println(ConsoleUtils.draw)
+              displayText(ConsoleUtils.draw)
               ConsoleUtils.displayBoard(updatedSession.board)
             case GameEndedCondition.Win(winner) =>
-              println(ConsoleUtils.win(winner.square))
+              displayText(ConsoleUtils.win(winner.square))
               ConsoleUtils.displayBoard(updatedSession.board)
           }
       }
@@ -46,15 +52,8 @@ class ConsoleGameClient(players: Players, gameEngine: GameEngine) {
   }
 }
 
-object ConsoleGameClient {
+object Client {
   import Square._
-
-  def switch(square: NonEmpty): NonEmpty = {
-    square match {
-      case X => O
-      case O => X
-    }
-  }
 
   @tailrec
   final def receiveSquareInput(): NonEmpty = {
