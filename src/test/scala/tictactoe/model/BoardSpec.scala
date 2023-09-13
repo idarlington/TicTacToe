@@ -30,22 +30,22 @@ class BoardSpec extends AnyWordSpec with Matchers {
     "Check row winner" in {
       val winningBoard = Board(Row(X, X, X), Row(Empty, O, Empty), Row(Empty, Empty, X))
 
-      board.checkRowWinner() shouldBe None
-      winningBoard.checkRowWinner() shouldBe Some(X)
+      board.checkWinner() shouldBe None
+      winningBoard.checkWinner() shouldBe Some(X)
     }
 
     "Check column winner" in {
       val winningBoard = Board(Row(X, O, O), Row(Empty, O, Empty), Row(Empty, O, X))
 
-      board.checkColumnWinner() shouldBe None
-      winningBoard.checkColumnWinner() shouldBe Some(O)
+      board.checkWinner() shouldBe None
+      winningBoard.checkWinner() shouldBe Some(O)
     }
 
     "Check diagonal winner" in {
       val winningBoard = Board(Row(X, O, O), Row(Empty, X, Empty), Row(Empty, O, X))
 
-      board.checkDiagonalWinner() shouldBe None
-      winningBoard.checkDiagonalWinner() shouldBe Some(X)
+      board.checkWinner() shouldBe None
+      winningBoard.checkWinner() shouldBe Some(X)
     }
 
     "Check board is full" in {

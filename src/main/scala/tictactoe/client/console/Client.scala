@@ -1,7 +1,7 @@
 package tictactoe.client.console
 
-import tictactoe.client.console.ConsoleUtils.displayText
 import tictactoe.client.console.Client.choosePlayer
+import tictactoe.client.console.ConsoleUtils.displayText
 import tictactoe.engine.GameEngine
 import tictactoe.model._
 
@@ -25,7 +25,6 @@ class Client(gameEngine: GameEngine) {
   }
 
   private final def loop(currentPlayer: Player, sessionId: UUID): Unit = {
-
     for {
       session <- gameEngine.getGameSession(sessionId).toRight(GameSessionDoesNotExistError())
 

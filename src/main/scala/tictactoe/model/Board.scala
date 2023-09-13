@@ -4,56 +4,6 @@ case class Board(row1: Row, row2: Row, row3: Row) {
   import Square._
   private def toMap: Map[String, Row] = Map("1" -> row1, "2" -> row2, "3" -> row3)
 
-  def checkColumnWinner(): Option[Square] = {
-    def checkColumnWin(square: Square, coordinates: Iterable[String]): Option[Square] = {
-      val columnWinnerMatches: Seq[Seq[String]] = Seq(
-        Seq("A1", "A2", "A3"),
-        Seq("B1", "B2", "B3"),
-        Seq("C1", "C2", "C3")
-      )
-      columnWinnerMatches
-        .map { win =>
-          win.forall { coordinate =>
-            coordinates.exists(_ == coordinate)
-          }
-        }
-        .collectFirst {
-          case true => square
-        }
-    }
-
-    val xSquareCoordinates = collateSquareCoordinates(X)
-    val oSquareCoordinates = collateSquareCoordinates(O)
-
-    checkColumnWin(X, xSquareCoordinates).orElse(checkColumnWin(O, oSquareCoordinates))
-  }
-
-  def checkDiagonalWinner(): Option[Square] = {
-    def checkDiagonalWin(square: Square, coordinates: Iterable[String]): Option[Square] = {
-      val diagonalWinnerMatches = Seq(Seq("A1", "B2", "C3"), Seq("C1", "B2", "A3"))
-      diagonalWinnerMatches
-        .map { win =>
-          win.forall { coordinate =>
-            coordinates.exists(_ == coordinate)
-          }
-        }
-        .collectFirst {
-          case true => square
-        }
-    }
-
-    val xSquareCoordinate = collateSquareCoordinates(X)
-    val oSquareCoordinate = collateSquareCoordinates(O)
-
-    checkDiagonalWin(X, xSquareCoordinate).orElse(checkDiagonalWin(O, oSquareCoordinate))
-  }
-
-  def checkWinner(): Option[Square] = {
-    checkRowWinner()
-      .orElse(checkColumnWinner())
-      .orElse(checkDiagonalWinner())
-  }
-
   def availableMoves(): Iterable[String] = {
     for {
       (rowKey, row) <- toMap
@@ -88,6 +38,63 @@ case class Board(row1: Row, row2: Row, row3: Row) {
     isDraw || checkWinner().isDefined
   }
 
+  def isDraw: Boolean = {
+    toMap.forall {
+      case (_, row) =>
+        row.isFilled
+    }
+  }
+
+  def checkWinner(): Option[Square] = {
+    checkRowWinner()
+      .orElse(checkColumnWinner())
+      .orElse(checkDiagonalWinner())
+  }
+
+  private def checkColumnWinner(): Option[Square] = {
+    def checkColumnWin(square: Square, coordinates: Iterable[String]): Option[Square] = {
+      val columnWinnerMatches: Seq[Seq[String]] = Seq(
+        Seq("A1", "A2", "A3"),
+        Seq("B1", "B2", "B3"),
+        Seq("C1", "C2", "C3")
+      )
+      columnWinnerMatches
+        .map { win =>
+          win.forall { coordinate =>
+            coordinates.exists(_ == coordinate)
+          }
+        }
+        .collectFirst {
+          case true => square
+        }
+    }
+
+    val xSquareCoordinates = collateSquareCoordinates(X)
+    val oSquareCoordinates = collateSquareCoordinates(O)
+
+    checkColumnWin(X, xSquareCoordinates).orElse(checkColumnWin(O, oSquareCoordinates))
+  }
+
+  private def checkDiagonalWinner(): Option[Square] = {
+    def checkDiagonalWin(square: Square, coordinates: Iterable[String]): Option[Square] = {
+      val diagonalWinnerMatches = Seq(Seq("A1", "B2", "C3"), Seq("C1", "B2", "A3"))
+      diagonalWinnerMatches
+        .map { win =>
+          win.forall { coordinate =>
+            coordinates.exists(_ == coordinate)
+          }
+        }
+        .collectFirst {
+          case true => square
+        }
+    }
+
+    val xSquareCoordinate = collateSquareCoordinates(X)
+    val oSquareCoordinate = collateSquareCoordinates(O)
+
+    checkDiagonalWin(X, xSquareCoordinate).orElse(checkDiagonalWin(O, oSquareCoordinate))
+  }
+
   private def collateSquareCoordinates(square: Square): Iterable[String] = {
     for {
       (rowKey, row) <- toMap
@@ -95,7 +102,7 @@ case class Board(row1: Row, row2: Row, row3: Row) {
     } yield s"$colKey$rowKey"
   }
 
-  def checkRowWinner(): Option[Square] = {
+  private def checkRowWinner(): Option[Square] = {
     toMap
       .find {
         case (_, row) =>
@@ -109,12 +116,5 @@ case class Board(row1: Row, row2: Row, row3: Row) {
         case (_, row) =>
           row.col1
       }
-  }
-
-  def isDraw: Boolean = {
-    toMap.forall {
-      case (_, row) =>
-        row.isFilled
-    }
   }
 }

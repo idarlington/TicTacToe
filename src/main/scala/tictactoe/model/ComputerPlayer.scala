@@ -2,8 +2,24 @@ package tictactoe.model
 
 import scala.util.Random
 
+case class MinMaxOutcome(score: Int, move: Option[String])
+
 case class ComputerPlayer(square: Square.NonEmpty) extends Player {
   private val random = new Random()
+
+  override def `type`: PlayerType = Computer
+
+  def play(board: Board): String = {
+    val minMaxMove = minimaxMove(
+      board    = board,
+      player   = square,
+      opponent = square.switch(),
+      depth    = 0,
+      maximize = true
+    )
+
+    minMaxMove.move.getOrElse(randomMove(board))
+  }
 
   private def randomMove(board: Board): String = {
     val availableMoves: Iterable[String] = board.availableMoves()
@@ -60,17 +76,4 @@ case class ComputerPlayer(square: Square.NonEmpty) extends Player {
     }
   }
 
-  def play(board: Board): String = {
-    val minMaxMove = minimaxMove(
-      board    = board,
-      player   = square,
-      opponent = square.switch(),
-      depth    = 0,
-      maximize = true
-    )
-
-    minMaxMove.move.getOrElse(randomMove(board))
-  }
-
-  override def `type`: PlayerType = Computer
 }
