@@ -102,23 +102,24 @@ object Client {
     receivePlayerType()
   }
 
+  @tailrec
   final def receiveCoordinateInput(availableMoves: Iterable[Coordinate]): Coordinate = {
-    val moves      = availableMoves.toSeq.map(_.toString)
     val coordinate = scala.io.StdIn.readLine().trim.toUpperCase().strip()
-    moves.find { move =>
-      move == coordinate
-    } match {
-      case Some(value) =>
-        toCoordinate(value).fold(
-          error => {
-            displayText(error)
-            receiveCoordinateInput(availableMoves)
-          },
-          coordinate => coordinate
-        )
-      case None =>
-        displayText(ConsoleUtils.invalidInput)
+
+    toCoordinate(coordinate) match {
+      case Left(error) =>
+        displayText(error)
         receiveCoordinateInput(availableMoves)
+      case Right(coord) =>
+        availableMoves.find { move =>
+          move == coord
+        } match {
+          case Some(_) =>
+            coord
+          case None =>
+            displayText(ConsoleUtils.invalidInput)
+            receiveCoordinateInput(availableMoves)
+        }
     }
   }
 
