@@ -1,18 +1,24 @@
 package tictactoe.model
 
+import eu.timepit.refined.auto._
+
 case class Board(row1: Row, row2: Row, row3: Row) {
   import Square._
-  private def toMap: Map[String, Row] = Map("1" -> row1, "2" -> row2, "3" -> row3)
+  private def toMap: Map[Coordinate.Row, Row] = Map(
+    (1: Coordinate.Row) -> row1,
+    (2: Coordinate.Row) -> row2,
+    (3: Coordinate.Row) -> row3
+  )
 
-  def availableMoves(): Iterable[String] = {
+  def availableMoves(): Iterable[Coordinate] = {
     for {
-      (rowKey, row) <- toMap
-      (colKey, square) <- row.toMap if square == Empty
-    } yield s"$colKey$rowKey"
+      (rowCoord, row) <- toMap
+      (colCoord, square) <- row.toMap if square == Empty
+    } yield Coordinate(column = colCoord, row = rowCoord)
   }
 
-  def updateBoard(input: Square, coordinate: String): Board = {
-    coordinate match {
+  def updateBoard(input: Square, coordinate: Coordinate): Board = {
+    coordinate.toString match {
       case "A1" if this.row1.col1 == Empty =>
         this.copy(row1 = this.row1.copy(col1 = input))
       case "A2" if this.row2.col1 == Empty =>

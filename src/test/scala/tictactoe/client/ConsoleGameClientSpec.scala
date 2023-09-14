@@ -1,8 +1,9 @@
 package tictactoe.client
 
+import eu.timepit.refined.auto._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec._
-import tictactoe.client.console.{ ConsoleUtils, Client }
+import tictactoe.client.console.{ Client, ConsoleUtils }
 import tictactoe.engine.InMemoryGameEngine
 import tictactoe.model._
 
@@ -11,6 +12,8 @@ import java.nio.charset.StandardCharsets
 
 class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
   import Square._
+
+  val B1: Coordinate   = Coordinate("B", 1)
   val board: Board     = Board(Row(X, Empty, O), Row(Empty, O, Empty), Row(Empty, Empty, X))
   val players: Players = Players(console.HumanPlayer(X), ComputerPlayer(O))
   val gameEngine       = new InMemoryGameEngine()
@@ -33,7 +36,7 @@ class ConsoleGameClientSpec extends AnyWordSpec with Matchers {
       val availableMoves = board.availableMoves()
 
       Console.withIn(in) {
-        Client.receiveCoordinateInput(availableMoves) shouldBe "B1"
+        Client.receiveCoordinateInput(availableMoves) shouldBe B1
       }
     }
 

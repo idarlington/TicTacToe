@@ -25,7 +25,7 @@ case class GameSession(
     }
   }
 
-  def playerMove(coordinate: String, player: Player): Either[Exception, GameSession] = {
+  def playerMove(coordinate: Coordinate, player: Player): Either[Exception, GameSession] = {
     state match {
       case GameState.InPlay =>
         if (player.square == players.currentPlayer.square) {

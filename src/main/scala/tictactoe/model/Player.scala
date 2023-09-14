@@ -5,5 +5,5 @@ trait Player {
 
   def `type`: PlayerType
 
-  def play(board: Board): String
+  def play(board: Board): Coordinate
 }

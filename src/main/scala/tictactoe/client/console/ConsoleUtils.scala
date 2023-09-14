@@ -1,6 +1,6 @@
 package tictactoe.client.console
 
-import tictactoe.model.{Board, Player, Square}
+import tictactoe.model.{Board, Coordinate, Player, Square}
 
 object ConsoleUtils {
   val invalidInput: String             = "Invalid choice, try again"
@@ -26,7 +26,7 @@ object ConsoleUtils {
     println(text)
   }
 
-  def move(coordinate: String, player: Player): String =
+  def move(coordinate: Coordinate, player: Player): String =
     s"Player ${player.square} played $coordinate"
 
   def win(square: Square): String = s"Player $square wins the game!!"

@@ -13,7 +13,7 @@ class InMemoryGameEngine() extends GameEngine {
     new ConcurrentHashMap[UUID, GameSession]().asScala
 
   override def playerMove(
-    coordinate: String,
+    coordinate: Coordinate,
     player: Player,
     sessionId: UUID
   ): Either[Exception, GameSession] = {

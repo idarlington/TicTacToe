@@ -10,6 +10,6 @@ case class GameSessionExistsError(id: UUID)
 case class GameSessionUpdateFailedError() extends GameEngineError("Failed to update game session")
 
 case class GameIsOverError(ended: GameState.Ended) extends GameEngineError("Game is already over")
-case class BoardCoordinateNotEmptyError(coordinate: String)
+case class BoardCoordinateNotEmptyError(coordinate: Coordinate)
     extends GameEngineError(s"Board coordinate $coordinate is not empty")
 case class NotPlayersTurnError(player: Player) extends GameEngineError(s"It is not $player's turn")

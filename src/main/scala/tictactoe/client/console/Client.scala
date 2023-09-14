@@ -102,22 +102,46 @@ object Client {
     receivePlayerType()
   }
 
-  @tailrec
-  final def receiveCoordinateInput(availableMoves: Iterable[String]): String = {
+  final def receiveCoordinateInput(availableMoves: Iterable[Coordinate]): Coordinate = {
+    val moves      = availableMoves.toSeq.map(_.toString)
     val coordinate = scala.io.StdIn.readLine().trim.toUpperCase().strip()
-    availableMoves.find { move =>
+    moves.find { move =>
       move == coordinate
     } match {
       case Some(value) =>
-        value
+        toCoordinate(value).fold(
+          error => {
+            displayText(error)
+            receiveCoordinateInput(availableMoves)
+          },
+          coordinate => coordinate
+        )
       case None =>
         displayText(ConsoleUtils.invalidInput)
         receiveCoordinateInput(availableMoves)
     }
   }
 
-  def showNextMoves(square: Square, moves: Iterable[String]): Unit = {
-    val formattedAvailableMoves: String = moves.toSeq.sorted.foldLeft("") {
+  private def toCoordinate(value: String): Either[String, Coordinate] = {
+    import eu.timepit.refined._
+
+    val split = value.split("").toSeq
+    val column = split.headOption
+      .toRight("Column coordinate is not specified")
+    val row = split.lastOption
+      .flatMap(_.toIntOption)
+      .toRight("Row coordinate is not specified")
+
+    for {
+      col <- column
+      row <- row
+      refinedCol <- refineV(col): Either[String, Coordinate.Column]
+      refinedRow <- refineV(row): Either[String, Coordinate.Row]
+    } yield Coordinate(refinedCol, refinedRow)
+  }
+
+  def showNextMoves(square: Square, moves: Iterable[Coordinate]): Unit = {
+    val formattedAvailableMoves: String = moves.toSeq.map(_.toString).sorted.foldLeft("") {
       case (moves, coordinate) => s"$moves $coordinate"
     }
     displayText(ConsoleUtils.showNextMove(square, formattedAvailableMoves))
